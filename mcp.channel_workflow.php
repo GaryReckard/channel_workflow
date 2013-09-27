@@ -184,7 +184,7 @@ class Channel_workflow_mcp {
     }
 
     return $return_array;
-	}
+  }
 	
   //returns array of field_name to field_id
   function getChannelFieldMap() 
@@ -202,7 +202,7 @@ class Channel_workflow_mcp {
     }
     //die("<pre>".print_r($return_array,true)."</pre>");
     return $return_array;
-	}
+  }
 	
 }
 /* End of file mcp.channel_workflow.php */

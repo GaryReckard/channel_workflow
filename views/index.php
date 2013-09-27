@@ -9,7 +9,6 @@
 	);
 	
 	//if channel has workflow enabled, channel name is a link that takes you to Completion Status view channel
-  //die("<pre>".print_r($channels,true)."</pre>");
 	foreach($channels as $channel_id=>$channel) {
 
     //disregard Pages channel

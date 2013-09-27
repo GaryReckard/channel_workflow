@@ -26,44 +26,46 @@
 
 class Channel_workflow_mcp {
 	
-	public $return_data;
+  public $return_data;
   private $channel_field_map;
-	private $_base_url;
-	
+  private $_base_url;
+
   public function __construct()
-	{
-		$this->EE =& get_instance();
-		
-		$this->_base_url = BASE.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=channel_workflow';
-		
+  {
+    $this->EE =& get_instance();
+
+    $this->_base_url = BASE.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=channel_workflow';
+
     $this->channel_field_map = $this->getChannelFieldMap();
   }
 	
   //main index/default module page
 	public function index()
 	{
-		$this->EE->cp->set_variable('cp_page_title', lang('channel_workflow_module_name'));
+    $this->EE->cp->set_variable('cp_page_title', lang('channel_workflow_module_name'));
     $this->EE->load->library('table');
-		
-		$vars = array();
+
+    $vars = array();
     $vars['_base_url'] = $this->_base_url;
     $vars['channel_fields_url'] = BASE.AMP.'C=admin_content'.AMP.'M=field_group_management';
-		
-	  //get channels like this $channel_id=>('url_name,' 'Friendly Name', 'has_status_field')  
+
+    //get channels like this $channel_id=>('url_name,' 'Friendly Name', 'has_status_field')  
     $channels = $this->getChannelArray();
     $vars['channels'] = $channels;
 
-		return $this->EE->load->view('index', $vars, TRUE);
+    return $this->EE->load->view('index', $vars, TRUE);
 
 	}
 
   //render statuses for a given channel
   public function viewStatus() {
 
+    $this->EE->load->library('table');
+
+    $vars = array();
+    $vars['_base_url'] = BASE.AMP.'C=content_publish'.AMP.'M=entry_form';
     $channel_id = $_GET['channel_id'];
     $channel_title= $_GET['channel_title'];
-    //die('channel title is '.$channel_title);
-    //die($channel_id);
 
     if (!isset($channel_id)) {
       die("channel id not set");
@@ -71,36 +73,39 @@ class Channel_workflow_mcp {
 
     $this->EE->view->cp_page_title = $channel_title;
 
-		$this->EE->cp->set_breadcrumb($this->_base_url, "Channel Worfklow");
+    $this->EE->cp->set_breadcrumb($this->_base_url, "Channel Worfklow");
 
-		$channel_map = $this->getChannelMap();
+    $channel_map = $this->getChannelMap();
 
-    //die(var_dump($channel_map));
-    $entries = $this->getEntries($channel_id);
-    
     //get array of all entries with this channel_id - name, url, status
+    $entries = $this->getEntries($channel_id);
+
+    $vars['entries'] = $entries;
+
+    return $this->EE->load->view('status', $vars, TRUE);
+
   }
   
-	//returns array of channels like this $channel_id=>('url_name,' 'Friendly Name', 'has_status_field')  
+  //returns array of channels like this $channel_id=>('url_name,' 'Friendly Name', 'has_status_field')  
   function getChannelArray() 
   {
 
     $return_array = array();
-	
-		$this->EE->db->select('*');
-		$this->EE->db->from('exp_channels');
-		$query = $this->EE->db->get();
-		$results = $query->result_array();
-		
-		foreach($results as $result) {
+
+    $this->EE->db->select('*');
+    $this->EE->db->from('exp_channels');
+    $query = $this->EE->db->get();
+    $results = $query->result_array();
+
+    foreach($results as $result) {
       $return_array[$result['channel_id']] = array(
         'url_title' => $result['channel_name'],
         'channel_title' => $result['channel_title'],
       ); 
-		}
-    
+    }
+
     //does a status field exist for this channel
-		//echo "<pre>".print_r($channel_field_map,true)."</pre>";
+    //echo "<pre>".print_r($channel_field_map,true)."</pre>";
 
     foreach ($return_array as $id=>$arr) {
       
@@ -120,7 +125,9 @@ class Channel_workflow_mcp {
     return $return_array;
   }
 	
-	//helpers...
+  //helpers...
+
+  //returns something like 'field_id_19'
   function getStatusField($id) {
     
     //get channel_name
@@ -146,28 +153,27 @@ class Channel_workflow_mcp {
   
   //takes channel_id and returns array of channel entries with statuses
   function getEntries($id) {
-
     //what's status field for this channel
     $status_field = $this->getStatusField($id);
 
-    //SELECT ct.url_title, ct.title FROM `exp_channel_data` cd, `exp_channel_titles` ct WHERE cd.channel_id = ct.channel_id AND cd.channel_id = 4;
-    $this->EE->db->select('*');
-    $this->EE->db->from('exp_channel_data','exp_channels');
-    $this->EE->db->where('channel_id', $id);
-		$query = $this->EE->db->get();
-		$results = $query->result_array();
-		//die("<pre>".print_r($results,true)."</pre>");
+    $select_string = 'SELECT ct.entry_id, ct.url_title, ct.title,'.$status_field.'  FROM `exp_channel_data` cd, `exp_channel_titles` ct
+      WHERE cd.entry_id= ct.entry_id AND cd.channel_id = '.$id;
+    //die($select_string);
+    $query = $this->EE->db->query($select_string);
+		$return_array = $query->result_array();
 
-    //which field is status?
-		echo "<pre>".print_r($this->channel_field_map,true)."</pre>";
-    
-    //what's the entry title and url?
+    //re-key on status string
+    foreach ($return_array as $key=>$result) {
+      $return_array[$key]['status'] = $result[$status_field];
 
-    
+    } 
+
+		//die("<pre>".print_r($return_array,true)."</pre>");
+    return $return_array;
 
   }
 
-	//returns array of channel_name to channel_id
+  //returns array of channel_name to channel_id
   function getChannelMap() 
   {
 		
@@ -185,7 +191,7 @@ class Channel_workflow_mcp {
 		return $return_array;
 	}
 	
-	//returns array of field_name to field_id
+  //returns array of field_name to field_id
   function getChannelFieldMap() 
   {
 		

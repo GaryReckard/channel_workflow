@@ -24,8 +24,9 @@ $lang = array(
   'does_not_have_status_field' => 'Does not have status field.',	
   'view_status' => 'View Status',
   'add_status' => 'Add Status',
-// Start inserting custom language keys/values here
-	
+  'entry_name' => 'Entry Name',	
+  'work_in_progress' => 'Work in Progress',
+
 );
 
 /* End of file lang.channel_workflow.php */

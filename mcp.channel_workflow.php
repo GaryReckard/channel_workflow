@@ -57,6 +57,68 @@ class Channel_workflow_mcp {
 
 	}
 
+	public function addStatus()
+	{
+
+		$this->EE->cp->set_breadcrumb($this->_base_url, "Channel Worfklow");
+		$this->EE->view->cp_page_title = "Adding Status";
+		$this->EE->load->library('table');
+		$this->EE->load->dbforge();
+
+		$vars = array();
+		//$vars['_base_url'] = BASE.AMP.'C=content_publish'.AMP.'M=entry_form';
+		$channel_id = $_GET['channel_id'];
+		$channel_title= $_GET['channel_title'];
+		//die("channel id is ".$channel_id." and title is ".$channel_title);
+
+		$status_field_name = $this->getStatusFieldName($channel_id);
+		//die($status_field_name);
+
+		if (!isset($channel_id)) {
+			die("channel id not set");
+		}
+
+		//there is a built-in function for this
+		if ($this->fieldExists($status_field_name)) {
+			die($status_field_name." already exists!"); 
+		}
+
+		$site_id = $this->EE->config->item('site_id');
+
+		//insert statement for new status field
+		$select_string = "INSERT INTO `exp_channel_fields` (`field_id`, `site_id`, `group_id`, `field_name`, `field_label`, `field_instructions`, `field_type`, `field_list_items`, `field_pre_populate`, `field_pre_channel_id`, `field_pre_field_id`, `field_ta_rows`, `field_maxl`, `field_required`, `field_text_direction`, `field_search`, `field_is_hidden`, `field_fmt`, `field_show_fmt`, `field_order`, `field_content_type`, `field_settings`) VALUES (NULL, '".$site_id."', '".$channel_id."', '".$status_field_name."', 'Status', '', 'select', 'Work in Progress\nCompleted\nApproved', 'n', '0', '0', '0', '0', 'n', 'ltr', 'n', 'n', 'none', 'n', '99', 'any', NULL)";
+
+		//die($select_string);
+		$query = $this->EE->db->query($select_string);
+		//$return_array = $query->result_array();
+
+		$last_id = $this->EE->db->insert_id();
+		//die("last id is ".$last_id);
+
+		//add columns to exp_channel_data
+		$field_ft = "field_ft_".$last_id;
+		$field_id = "field_id_".$last_id;
+		$fields = array(
+				$field_ft => array(
+					'type' => 'TEXT',
+				),
+				$field_id => array(
+					'type' => 'TEXT',
+				),
+		);
+
+		$this->EE->dbforge->add_column('channel_data', $fields);
+
+		die("added, or attempted to add status field for ".$channel_title);
+		//example code from channel_files module
+		//$fields = array( 'link_channel_id'	=> array('type' => 'INT',	'unsigned' => TRUE, 'default' => 0) );
+		//$this->EE->dbforge->add_column('channel_files', $fields, 'link_entry_id');
+
+
+		//load view with feedback
+		
+	}
+
 	//render statuses for a given channel
 	public function viewStatus() 
 	{
@@ -181,23 +243,48 @@ class Channel_workflow_mcp {
 	
 	//helpers...
 
-	//returns something like 'field_id_19'
-	function getStatusField($id) 
+	function fieldExists($status_field_name)
 	{
+		//get all the field_names
+		$this->EE->db->select('field_name');
+		$this->EE->db->from('exp_channel_fields');
+		$query = $this->EE->db->get();
+		$results = $query->result_array();
 		
-		//get channel_name
+		//is status_field_name in there?
+		foreach ($results as $result) {
+			if ($result['field_name'] == $status_field_name) return true;
+			
+		}
+
+		//status_field_name does not already exist in exp_channel_fields table
+		return false;
+	}
+
+
+	//get the field_name_like_this
+	function getStatusFieldName($id)
+	{
 		$this->EE->db->select('channel_name');
 		$this->EE->db->from('exp_channels');
 		$this->EE->db->where('channel_id', $id);
 		$query = $this->EE->db->get();
 		$results = $query->result_array();
 		$channel_name = $results[0]['channel_name'];
-		$status_field = $channel_name."_status";
+		$status_field_name = $channel_name."_status";
+		return $status_field_name;
+	}
+
+	//returns something like 'field_id_19'
+	function getStatusField($id) 
+	{
+
+		$status_field_name = $this->getStatusFieldName($id); 
 
 		//getStatusField.  that's what ya came here to do, right?
 		$this->EE->db->select('field_id');
 		$this->EE->db->from('exp_channel_fields');
-		$this->EE->db->where('field_name', $status_field);
+		$this->EE->db->where('field_name', $status_field_name);
 		$query = $this->EE->db->get();
 		$results = $query->result_array();
 		$status_field_num = $results[0]['field_id'];

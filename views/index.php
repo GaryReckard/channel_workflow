@@ -18,7 +18,7 @@
 		$this->table->add_row(
 			$channel['channel_title'],
 			$channel['has_status']? lang('has_status_field'): lang('does_not_have_status_field'),
-			$channel['has_status']? "<a href='".$_base_url.AMP."method=viewStatus".AMP."channel_id=".$channel_id.AMP."channel_title=".$channel['channel_title']."'>".lang('view_status')."</a>": "<a href='".$channel_fields_url."'>".lang('add_status')."</a>"
+			$channel['has_status']? "<a href='".$_base_url.AMP."method=viewStatus".AMP."channel_id=".$channel_id.AMP."channel_title=".$channel['channel_title']."'>".lang('view_status')."</a>": "<a href='".$_base_url.AMP."method=addStatus".AMP."channel_id=".$channel_id.AMP."channel_title=".$channel['channel_title']."'>".lang('add_status')."</a>"
 		);
 	}
 

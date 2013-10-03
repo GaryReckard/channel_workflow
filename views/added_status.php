@@ -1,6 +1,6 @@
 <?
 //die("<pre>".print_r($entries,true)."</pre>");
-if ($success == FALSE) {?>
+if (isset($success) && $success == FALSE) {?>
 	<p><?=$channel_title?> already has a status field.</p>
 <?} 
 else { ?>

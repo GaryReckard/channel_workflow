@@ -57,6 +57,7 @@ class Channel_workflow_mcp {
 
 	}
 
+	//updates EE tables with necessary fields for adding the_channel_name_status
 	public function addStatus()
 	{
 
@@ -66,34 +67,34 @@ class Channel_workflow_mcp {
 		$this->EE->load->dbforge();
 
 		$vars = array();
-		//$vars['_base_url'] = BASE.AMP.'C=content_publish'.AMP.'M=entry_form';
 		$channel_id = $_GET['channel_id'];
 		$channel_title= $_GET['channel_title'];
-		//die("channel id is ".$channel_id." and title is ".$channel_title);
+		$vars['channel_title'] = $channel_title;
 
 		$status_field_name = $this->getStatusFieldName($channel_id);
-		//die($status_field_name);
 
 		if (!isset($channel_id)) {
 			die("channel id not set");
 		}
 
-		//there is a built-in function for this
+		//there is a built-in function for this, refactor when you have time
 		if ($this->fieldExists($status_field_name)) {
-			die($status_field_name." already exists!"); 
+			//die($status_field_name." already exists!"); 
+			$vars['success'] = FALSE; 
+			return $this->EE->load->view('added_status', $vars, TRUE);
 		}
 
 		$site_id = $this->EE->config->item('site_id');
 
-		//insert statement for new status field
-		$select_string = "INSERT INTO `exp_channel_fields` (`field_id`, `site_id`, `group_id`, `field_name`, `field_label`, `field_instructions`, `field_type`, `field_list_items`, `field_pre_populate`, `field_pre_channel_id`, `field_pre_field_id`, `field_ta_rows`, `field_maxl`, `field_required`, `field_text_direction`, `field_search`, `field_is_hidden`, `field_fmt`, `field_show_fmt`, `field_order`, `field_content_type`, `field_settings`) VALUES (NULL, '".$site_id."', '".$channel_id."', '".$status_field_name."', 'Status', '', 'select', 'Work in Progress\nCompleted\nApproved', 'n', '0', '0', '0', '0', 'n', 'ltr', 'n', 'n', 'none', 'n', '99', 'any', NULL)";
+		$field_settings = "YTo2OntzOjE4OiJmaWVsZF9zaG93X3NtaWxleXMiO3M6MToibiI7czoxOToiZmllbGRfc2hvd19nbG9zc2FyeSI7czoxOiJuIjtzOjIxOiJmaWVsZF9zaG93X3NwZWxsY2hlY2siO3M6MToibiI7czoyNjoiZmllbGRfc2hvd19mb3JtYXR0aW5nX2J0bnMiO3M6MToibiI7czoyNDoiZmllbGRfc2hvd19maWxlX3NlbGVjdG9yIjtzOjE6Im4iO3M6MjA6ImZpZWxkX3Nob3dfd3JpdGVtb2RlIjtzOjE6Im4iO30=";
 
+		//insert new field into exp_channel_fields
+		$select_string = "INSERT INTO `exp_channel_fields` (`field_id`, `site_id`, `group_id`, `field_name`, `field_label`, `field_instructions`, `field_type`, `field_list_items`, `field_pre_populate`, `field_pre_channel_id`, `field_pre_field_id`, `field_ta_rows`, `field_maxl`, `field_required`, `field_text_direction`, `field_search`, `field_is_hidden`, `field_fmt`, `field_show_fmt`, `field_order`, `field_content_type`, `field_settings`) VALUES (NULL, '".$site_id."', '".$channel_id."', '".$status_field_name."', 'Status', '', 'select', 'Work in Progress\nCompleted\nApproved', 'n', '0', '0', '6', '128', 'n', 'ltr', 'n', 'n', 'none', 'n', '99', 'any','".$field_settings."')";
 		//die($select_string);
 		$query = $this->EE->db->query($select_string);
-		//$return_array = $query->result_array();
 
 		$last_id = $this->EE->db->insert_id();
-		//die("last id is ".$last_id);
+		$vars['id'] = $last_id;
 
 		//add columns to exp_channel_data
 		$field_ft = "field_ft_".$last_id;
@@ -109,13 +110,31 @@ class Channel_workflow_mcp {
 
 		$this->EE->dbforge->add_column('channel_data', $fields);
 
-		die("added, or attempted to add status field for ".$channel_title);
-		//example code from channel_files module
-		//$fields = array( 'link_channel_id'	=> array('type' => 'INT',	'unsigned' => TRUE, 'default' => 0) );
-		//$this->EE->dbforge->add_column('channel_files', $fields, 'link_entry_id');
+		//add field formatting options to exp_field_formatting
+		$data = array(
+			 array(
+					'field_id' => $last_id ,
+					'field_fmt' => 'xhtml'
+			 ),
+			 array(
+					'field_id' => $last_id ,
+					'field_fmt' => 'markdown'
+			 ),
+			 array(
+					'field_id' => $last_id ,
+					'field_fmt' => 'br'
+			 ),
+			 array(
+					'field_id' => $last_id ,
+					'field_fmt' => 'none'
+			 ),
+		 );
 
+		$this->EE->db->insert_batch('exp_field_formatting', $data); 
+		//die($this->EE->db->last_query());
 
 		//load view with feedback
+		return $this->EE->load->view('added_status', $vars, TRUE);
 		
 	}
 

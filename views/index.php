@@ -1,5 +1,5 @@
 <p><?=lang('welcome')?></p>
-<!--<p><?=lang('warning')?></p>-->
+<p><?=lang('warning')?></p>
 
 <?php
 	$this->table->set_heading(

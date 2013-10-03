@@ -3,7 +3,7 @@
 $lang = array(	
 	'channel_workflow_module_name' => 
 	'Channel Workflow',
-  
+	
 	'channel_workflow_module_description' => 
 	'Allow backend users to view progress of their channel content.',
 
@@ -11,11 +11,9 @@ $lang = array(
 	'add_channel' => 'Add a Channel',
 	'channel_workflow_module_name' => 'Channel Workflow',
 	'configuration' => 'Configuration',
-	'welcome' => 'This module is intended to help you keep track of your various channels.  For pages, please use the Pages Worfklow module.
-	  For other channels, add a field called \'Status\'.  The syntax must be the shortcode for the chanel_name followed by \'_status\'.
-	  For example, a channel called \'Event\' should have the field title \'event_status\'.  This field defaults to \'Work in Progress.\'',
+	'welcome' => 'This module is intended to help you keep track of your various channels and their statuses.  For pages, please use the Pages Worfklow module.',
 	'warning' => 'This module will add a field to each channel with a specific name.  For example, a channel called event will get a new
-	 field called event_completion_status if it doesn\'t already have one.',
+	 field called event_completion_status if it doesn\'t already have one. Statuses default to Work in Progress',
 	'channel_name' => 'Channel Name',
 	'status' => 'Status',
 	'action' => 'Action',

@@ -13,7 +13,7 @@ $lang = array(
 	'configuration' => 'Configuration',
 	'welcome' => 'This module is intended to help you keep track of your various channels and their statuses.  For pages, please use the Pages Worfklow module.',
 	'warning' => 'This module will add a field to each channel with a specific name.  For example, a channel called event will get a new
-	 field called event_completion_status if it doesn\'t already have one. Statuses default to Work in Progress',
+	 field called event_completion_status if it doesn\'t already have one. Statuses default to Work in Progress.  BE SURE TO CREATE A CHANNEL FIELD GROUP FOR EACH CHANNEL BEFORE ADDING A STATUS FIELD.',
 	'channel_name' => 'Channel Name',
 	'status' => 'Status',
 	'action' => 'Action',
